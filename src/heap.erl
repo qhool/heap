@@ -101,12 +101,12 @@ top({P,_,_}) ->
 -define(ss2(H,Item),?ss(siftdown2,Type,H,Item)).
 -define(ss2(N,H,Item),?ss(siftdown2,Type,N,H,Item)).
 
-most(_Mode,_Take,{heap,_,0,{}}) ->
-    empty;
 most(min,_,{heap,max,_,_}) ->
     {error,max};
 most(max,_,{heap,min,_,_}) ->
     {error,min};
+most(_Mode,_Take,{heap,_,0,{}}) ->
+    empty;
 most(_Mode,keep,{heap,_Type,1,{I}}) ->
     {ok,I};
 most(_Mode,take,{heap,Type,1,{I}}) ->
