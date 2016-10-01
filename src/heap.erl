@@ -381,6 +381,17 @@ insert_take_test_() ->
          HeapType <- [ min, max, mmax, mmin ],
          {ListType,List} <- test_lists() ]}.
 
+steady_test_() ->
+    {inparallel,
+     [ { string:join([ atom_to_list(HeapType), integer_to_list(Size),
+                       "for", integer_to_list(N), "steps" ], " "),
+         fun() ->
+                 steady_test(HeapType,Size,N)
+         end }
+       || HeapType <- [ mmax, mmin ],
+          Size <- lists:seq(2,200,7),
+          N <- [100,500,999] ]}.
+
 take_test(Mode,H) ->
     take_test(Mode,H,none).
 
@@ -410,6 +421,35 @@ take_test(Mode,H,Last) ->
     end,
     take_test(Mode,H1,Item).
 
+steady_test(Mode,Size,N_Steps) ->
+    InitList = test_list({random,Size},Size),
+    Heap = from_list(Mode,InitList),
+    SortList = lists:sort(InitList),
+    steady_test(Heap,Mode,if Mode == mmin -> SortList;
+                             true -> lists:reverse(SortList)
+                          end, Size, N_Steps).
+
+steady_test(Heap,Mode,List,_,0) ->
+    List = to_list(optype(Mode),Heap);
+steady_test(Heap,Mode,List,Size,N) ->
+    io:format("Mode: ~p~n",[Mode]),
+    {ok,Item,Heap1} = most(optype(Mode),take,Heap),
+    [Item|List1] = List,
+    NewItem = crypto:rand_uniform(1,Size),
+    List2 = case Mode of
+                mmin -> lists:reverse(ins_list(List1,NewItem));
+                mmax -> ins_list(lists:reverse(List1),NewItem)
+            end,
+    Heap2 = insert(Heap1,NewItem),
+    steady_test(Heap2,nexttype(Mode),List2,Size,N-1).
+
+ins_list(List,Item) ->
+    ins_list(List,Item,[]).
+ins_list([T|Tail],Item,Head) when Item > T ->
+    ins_list(Tail,Item,[T|Head]);
+ins_list(Tail,Item,Head) ->
+    lists:reverse(Head) ++ [Item|Tail].
+
 test_lists() ->
     [ {unicode:characters_to_list(io_lib:format("~p.~p",[Type,N])),test_list(Type,N)}
       || Type <- [ sequence, reverse, interleave, reverse_interleave,
@@ -418,9 +458,7 @@ test_lists() ->
                    {random,144},{random,241},{random,569},
                    {random,777},{random,1000},
                    shuffle ],
-         N <- lists:seq(1,250),
-         ( Type =/= interleave andalso Type =/= interleave ) orelse
-             N div 2 == 0 ].
+         N <- lists:seq(1,250) ].
 test_list(sequence,N) ->
     lists:seq(1,N);
 test_list(reverse,N) ->
