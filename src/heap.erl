@@ -1,7 +1,5 @@
 -module(heap).
 
--include_lib("eunit/include/eunit.hrl").
-
 -export([new/0,new/1,
          insert/2, append/2,
          min/1,max/1,
@@ -10,6 +8,8 @@
          to_list/1, to_list/2]).
 
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
 -export([print/1,test_list/2,insert_test/2,take_test/2,
          take_bottom/1,listmost/2]).
 -endif.
@@ -290,6 +290,8 @@ optype(Type) ->
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-ifdef(TEST).
+
 print(Heap) ->
     print(standard_io,Heap).
 print(F,{heap,_,_,Heap}) ->
@@ -434,3 +436,5 @@ test_list({random,R},N) ->
 test_list(shuffle,N) ->
     [ X || {_,X} <- lists:sort( lists:zip( test_list({random,N*100},N),
                                            lists:seq(1,N) ) ) ].
+
+-endif. %%TEST
