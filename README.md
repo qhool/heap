@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/qhool/heap.svg?branch=master)](https://travis-ci.org/qhool/heap)
 # Min-Max Heap in erlang
 
 [Min-max heaps](https://en.wikipedia.org/wiki/Min-max_heap) allow either the largest _or_ the smallest element to be removed, which makes them great for double-ended priority queues.
