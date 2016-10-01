@@ -1,6 +1,6 @@
 # Min-Max Heap in erlang
 
-[Min-max heaps](https://en.wikipedia.org/wiki/Min-max_heap) allow either the largest _or_ the smallest element to be removed, whihc makes them great for double-ended priority queues.
+[Min-max heaps](https://en.wikipedia.org/wiki/Min-max_heap) allow either the largest _or_ the smallest element to be removed, which makes them great for double-ended priority queues.
 
 This implementation stores the heaps as trees of erlang tuples.  It supports heaps where the top level is the smallest (min-max) or largest (max-min), as well as ordinary min-heaps and max-heaps.
 
