@@ -363,23 +363,36 @@ insert_test(Heap,[]) ->
     Heap.
 
 insert_take_test_() ->
-    {inparallel,[ { string:join([atom_to_list(HeapType),atom_to_list(Fn),
-                     integer_to_list(length(List)),ListType]," "),
-        case Fn of
-            insert ->
-                fun() ->
-                        insert_test(HeapType,List)
-                end;
-            take ->
-                fun() ->
-                        take_test(optype(HeapType),
-                                  from_list(HeapType,List))
-                end
-        end
-      }
-      || Fn <- [insert,take],
-         HeapType <- [ min, max, mmax, mmin ],
-         {ListType,List} <- test_lists() ]}.
+    {inparallel,
+     [ {generator,
+        fun() ->
+                insert_take_test_gen(ListKind)
+        end}
+       || ListKind <- [ sequence, reverse, interleave, reverse_interleave,
+                        {random,7},{random,10},{random,13},
+                        {random,20},{random,33},{random,100},{random,127},
+                        {random,144},{random,241},{random,569},
+                        {random,777},{random,1000},
+                        shuffle ] ]}.
+insert_take_test_gen(ListKind) ->
+    {inparallel,
+     [ { string:join([atom_to_list(HeapType),atom_to_list(Fn),
+                      integer_to_list(length(List)),ListType]," "),
+         case Fn of
+             insert ->
+                 fun() ->
+                         insert_test(HeapType,List)
+                 end;
+             take ->
+                 fun() ->
+                         take_test(optype(HeapType),
+                                   from_list(HeapType,List))
+                 end
+         end
+       }
+       || Fn <- [insert,take],
+          HeapType <- [ min, max, mmax, mmin ],
+          {ListType,List} <- test_lists(ListKind) ]}.
 
 steady_test_() ->
     {inparallel,
@@ -450,15 +463,9 @@ ins_list([T|Tail],Item,Head) when Item > T ->
 ins_list(Tail,Item,Head) ->
     lists:reverse(Head) ++ [Item|Tail].
 
-test_lists() ->
+test_lists(Type) ->
     [ {unicode:characters_to_list(io_lib:format("~p.~p",[Type,N])),test_list(Type,N)}
-      || Type <- [ sequence, reverse, interleave, reverse_interleave,
-                   {random,7},{random,10},{random,13},
-                   {random,20},{random,33},{random,100},{random,127},
-                   {random,144},{random,241},{random,569},
-                   {random,777},{random,1000},
-                   shuffle ],
-         N <- lists:seq(1,250) ].
+      || N <- lists:seq(1,250) ].
 test_list(sequence,N) ->
     lists:seq(1,N);
 test_list(reverse,N) ->
